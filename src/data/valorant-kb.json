@@ -1,0 +1,497 @@
+{
+  "last_updated": "2025-05-17",
+  "note": "Rosters change frequently — web search is used for current roster verification. This KB focuses on stable playstyle identity, strategy tendencies, and player characteristics.",
+
+  "teams": {
+    "sentinels": {
+      "region": "Americas",
+      "full_name": "Sentinels",
+      "roster": ["TenZ", "johnqt", "zekken", "bang", "sacy"],
+      "coach": "Kaplan",
+      "playstyle": "Star-player-centric aggressive play built around TenZ's mechanical dominance. Fast-paced, high-individual-skill executes with TenZ taking space as the primary duel-seeker. johnqt provides IGL structure and strategic anchor, while sacy and bang deliver world-class initiator utility. The team plays to win duels individually, trusting individual performances to carry.",
+      "map_pool": {
+        "best": ["Ascent", "Haven", "Bind"],
+        "avoid": ["Lotus", "Breeze"]
+      },
+      "agent_comps": {
+        "default": "Jett or Neon (TenZ), Omen or Harbor, Killjoy or Cypher, Skye or Fade, Gekko or Breach"
+      },
+      "strengths": [
+        "TenZ's mechanical ceiling is one of the highest in the world — can single-handedly win rounds",
+        "johnqt is a smart, calculated IGL who never wastes resources",
+        "sacy and bang are elite initiator players — some of the best utility usage in Americas",
+        "Strong mental game, known for clutching high-pressure situations"
+      ],
+      "weaknesses": [
+        "Over-reliance on TenZ — when he's cold the team can look lost",
+        "Can be passive mid-map if TenZ isn't creating picks",
+        "Inconsistent on maps that require heavy controller-driven strategies"
+      ],
+      "notable_achievements": [
+        "TenZ led the team to multiple VCT tournament wins",
+        "One of the most recognizable esports orgs globally"
+      ]
+    },
+
+    "loud": {
+      "region": "Americas",
+      "full_name": "LOUD",
+      "roster": ["Aspas", "Less", "cauanzin", "tuyz", "saadhak"],
+      "coach": "bzkA",
+      "playstyle": "Brazil's banner carrier plays an incredibly aggressive, high-tempo style. Aspas is arguably the best Valorant player of all time — his dueling ability is unmatched globally. LOUD plays fast executes, constant pressure, and multi-pronged aggression. saadhak's IGL style is smart but always leans into aggression. Less and cauanzin provide surgical initiator support. They are the team that essentially wrote the blueprint for 'Brazilian Valorant.'",
+      "map_pool": {
+        "best": ["Bind", "Ascent", "Sunset"],
+        "avoid": ["Pearl", "Breeze"]
+      },
+      "agent_comps": {
+        "default": "Jett (Aspas), Omen or Viper, Killjoy, Fade or Skye, Gekko or Breach"
+      },
+      "strengths": [
+        "Aspas is the single most consistent individual performer in Valorant history",
+        "Incredible team chemistry — they've played together for years",
+        "Brazilian mental fortitude — rarely tilt, play better under pressure",
+        "saadhak is a top-5 IGL globally, masterful at mid-round calls",
+        "Extremely fast executes that overwhelm defenses"
+      ],
+      "weaknesses": [
+        "Can be readable when their default aggressive patterns are mapped out",
+        "Less effective in slow, methodical controller-dominant maps",
+        "Aspas sometimes overextends chasing duel quotas"
+      ],
+      "notable_achievements": [
+        "Champions 2022 winners",
+        "Masters Tokyo 2023 winners",
+        "Consistently one of the top 3 teams in the world"
+      ]
+    },
+
+    "paper_rex": {
+      "region": "Pacific",
+      "full_name": "Paper Rex",
+      "roster": ["mindfreak", "f0rsakeN", "d4v41", "something", "Jinggg"],
+      "coach": "alecks",
+      "playstyle": "The most entertaining and chaotic team in Valorant. Paper Rex plays a hyper-aggressive, full-team-commit style that breaks every conventional Valorant rule. They spam timings, rush sites with full force, and play at a pace that gives opponents no time to think. alecks has built a system where chaos is the strategy — they train to be unpredictable and overwhelm teams with speed and noise. mindfreak is one of the most explosive entry players in the world.",
+      "map_pool": {
+        "best": ["Bind", "Haven", "Ascent"],
+        "avoid": ["Breeze", "Pearl"]
+      },
+      "agent_comps": {
+        "default": "Neon or Jett, Fade or Gekko, Skye, Omen, Killjoy — always with at minimum 2 initiators for aggressive info"
+      },
+      "strengths": [
+        "Unpredictable — opponents genuinely cannot prepare for their chaos",
+        "mindfreak is a mechanical monster in entry situations",
+        "alecks is one of the most innovative coaches in VCT",
+        "Incredible raw aggression that punishes passive teams",
+        "Strong mental — they've beaten top teams at every tournament"
+      ],
+      "weaknesses": [
+        "The chaos style has a high skill floor — when individual players miss their shots, the strategy falls apart",
+        "Can be countered by calm, structured teams who don't panic",
+        "Map-pool limitations restrict their veto options against top teams"
+      ],
+      "notable_achievements": [
+        "Champions 2022 runners-up",
+        "Multiple Masters appearances and deep runs",
+        "Considered one of the most exciting teams to watch in VCT history"
+      ]
+    },
+
+    "fnatic": {
+      "region": "EMEA",
+      "full_name": "Fnatic",
+      "roster": ["Boaster", "Leo", "Chronicle", "Alfajer", "Derke"],
+      "coach": "Mini",
+      "playstyle": "EMEA's flagship team plays a disciplined, structured but aggressive style. Boaster is one of the best IGLs in the world — his mid-round decision-making is elite and he's famous for calling gutsy, correct reads. Derke is a mechanical duelist of the highest order. Leo's initiator play and Chronicle's flex versatility give Fnatic enormous strategic depth. They can play slow or fast, loose or structured — the most complete team in EMEA.",
+      "map_pool": {
+        "best": ["Ascent", "Haven", "Lotus"],
+        "avoid": ["Breeze", "Pearl"]
+      },
+      "agent_comps": {
+        "default": "Jett (Derke), Omen or Viper, Killjoy or Cypher, Skye or Fade (Leo), Gekko or Breach (Boaster)"
+      },
+      "strengths": [
+        "Boaster is arguably the best IGL in the world — calm, decisive, creative",
+        "Derke is a top-3 duelist globally in terms of mechanical ability",
+        "Leo is the perfect initiator — his Fade and Skye usage is textbook perfect",
+        "Chronicle's flexibility means they can run any composition",
+        "Deep map pool — can credibly play any map in the pool"
+      ],
+      "weaknesses": [
+        "Can be passive when waiting for Boaster's reads rather than forcing",
+        "Derke has shown inconsistency at international LANs",
+        "Sometimes too structured — get caught in predictable defaults"
+      ],
+      "notable_achievements": [
+        "Champions 2023 runners-up",
+        "Multiple Masters wins",
+        "VCT EMEA League dominant force since league inception"
+      ]
+    },
+
+    "team_liquid": {
+      "region": "EMEA",
+      "full_name": "Team Liquid",
+      "roster": ["Jamppi", "Nivera", "Sayf", "nAts", "soulcas"],
+      "coach": "Mattiasgenix",
+      "playstyle": "Liquid plays a patient, read-heavy style built around nAts — the sentinel master who has the best individual game-sense and positioning in Valorant. They prefer structured defaults, gathering information, and punishing enemies who overextend. nAts's Cypher and Killjoy setups are studied by every team worldwide. When nAts gets info, Liquid executes intelligently with Sayf and Jamppi providing the dueling output.",
+      "map_pool": {
+        "best": ["Ascent", "Bind", "Lotus"],
+        "avoid": ["Haven", "Sunset"]
+      },
+      "agent_comps": {
+        "default": "Jett or Neon (Jamppi/Sayf), Viper or Omen, Cypher or Killjoy (nAts), Fade or Skye, Gekko"
+      },
+      "strengths": [
+        "nAts is the best sentinel player in Valorant history — his setups are studied globally",
+        "Incredibly patient and disciplined — rarely give opponents free information",
+        "Strong anti-stratting — Mattiasgenix is a meticulous prep coach",
+        "Sayf is a dual-threat duelist who can flex to initiator roles"
+      ],
+      "weaknesses": [
+        "Can be too passive on CT side, allowing opponents to gather economic advantage",
+        "nAts-centric play becomes predictable when opponents specifically boot him",
+        "Sometimes slow to adapt mid-series when their prep is countered"
+      ],
+      "notable_achievements": [
+        "Consistent top-4 EMEA finisher",
+        "nAts won Masters Reykjavik 2022 with Gambit — considered one of the greatest Valorant performances"
+      ]
+    },
+
+    "nrg": {
+      "region": "Americas",
+      "full_name": "NRG",
+      "roster": ["FNS", "s0m", "ardiis", "crashies", "Victor"],
+      "coach": "Potter",
+      "playstyle": "NRG is the most tactically sophisticated team in Americas. FNS is a cerebral IGL who game-plans obsessively — he is famous for 'calling the opponent' with his reads. They play structured defaults, gather information before committing, and execute with precision rather than raw speed. Potter is an elite coach who provides deep strategic frameworks. NRG is the 'analyst's team' — if you love strategy, you love watching NRG.",
+      "map_pool": {
+        "best": ["Ascent", "Lotus", "Bind"],
+        "avoid": ["Haven", "Breeze"]
+      },
+      "agent_comps": {
+        "default": "Jett or Raze (ardiis/Victor), Omen or Astra, Killjoy or Cypher, Skye or Fade, Gekko"
+      },
+      "strengths": [
+        "FNS is one of the smartest IGLs ever — his mid-round reads are legendary",
+        "crashies and Victor are an elite duo who complement each other perfectly",
+        "Potter is a world-class coach — her systems are studied industry-wide",
+        "Extremely consistent — rarely get stomped, always play competitive series",
+        "Strong on every map in the pool — no hard ban preferences"
+      ],
+      "weaknesses": [
+        "Individual mechanical ceiling is lower than LOUD or Sentinels",
+        "FNS IGL style can be predictable — opponents who prep NRG heavily can read their defaults",
+        "Struggle to win pure aim duels against the world's top mechanical players"
+      ],
+      "notable_achievements": [
+        "VCT Americas League podium finishes",
+        "Deep international runs at Masters events"
+      ]
+    },
+
+    "cloud9": {
+      "region": "Americas",
+      "full_name": "Cloud9",
+      "roster": ["Xeppaa", "mwzera", "Vanity", "jahbee", "Zellsis"],
+      "coach": "kaplan",
+      "playstyle": "Cloud9 plays a balanced style anchored by mwzera — the Brazilian import who brings elite mechanical skill and clutch ability. Vanity provides IGL depth and strategic structure. They combine Americas tactical discipline with raw Brazilian aggression through mwzera. A team built around adaptability — can play multiple styles depending on the map.",
+      "map_pool": {
+        "best": ["Ascent", "Bind", "Haven"],
+        "avoid": ["Pearl", "Breeze"]
+      },
+      "agent_comps": {
+        "default": "Jett or Neon (mwzera), Omen, Killjoy, Fade or Skye, Gekko"
+      },
+      "strengths": [
+        "mwzera has one of the highest mechanical ceilings in Americas",
+        "Vanity is an underrated IGL — calm and methodical",
+        "Good depth — multiple players can step up in any given match"
+      ],
+      "weaknesses": [
+        "Team identity is still forming — chemistry can look shaky at times",
+        "Over-reliance on mwzera to generate individual advantages"
+      ],
+      "notable_achievements": [
+        "Americas League playoff contender",
+        "Historical C9 lineups have won multiple Champions titles"
+      ]
+    },
+
+    "drx": {
+      "region": "Pacific",
+      "full_name": "DRX",
+      "roster": ["BuZz", "MaKo", "Rb", "stax", "Zest"],
+      "coach": "Termi",
+      "playstyle": "DRX is the most fundamentally disciplined team in the Pacific. stax is a meticulous IGL — structured, information-first, never wasteful. BuZz is one of the most versatile players in VCT — can play duelist, initiator, or flex at an elite level. MaKo's controller play defines DRX's ability to create space and execute. They play a slow, suffocating style that drains the clock and punishes aggressive teams.",
+      "map_pool": {
+        "best": ["Haven", "Ascent", "Lotus"],
+        "avoid": ["Bind", "Sunset"]
+      },
+      "agent_comps": {
+        "default": "Jett or Raze, Astra or Viper (MaKo), Killjoy or Cypher, Fade or Skye (BuZz), Breach"
+      },
+      "strengths": [
+        "stax is one of the smartest IGLs in VCT — reads opponents at a very high level",
+        "BuZz is arguably the most versatile player in Pacific — can fill any role",
+        "Exceptional CT-side discipline — one of the best default-stall teams in the world",
+        "MaKo's controller mastery creates tight, controlled executes"
+      ],
+      "weaknesses": [
+        "Can be slow-paced — struggle against hyper-aggressive teams like Paper Rex",
+        "Rb is a solid but not elite duelist — can be exploited by top duelists",
+        "Sometimes too structured — opponents can time their defaults perfectly"
+      ],
+      "notable_achievements": [
+        "Champions 2022 — won the entire tournament (stax/BuZz era)",
+        "Multiple Masters top placements",
+        "Korea's most successful Valorant org"
+      ]
+    },
+
+    "evil_geniuses": {
+      "region": "Americas",
+      "full_name": "Evil Geniuses",
+      "roster": ["demons1", "Boostio", "C0M", "Ethan", "jawgemo"],
+      "coach": "Potter (formerly, now NRG)",
+      "playstyle": "EG burst onto the scene as the chaos team of Americas — they played an extremely aggressive, unpredictable style led by young mechanical talents. demons1 is a mechanical prodigy. Boostio's controller plays are creative and aggressive — not the slow Astra macro of other teams, but a punishing, aggressive smoke usage. Their energy is high, their reads are fast, and they make their opponents uncomfortable.",
+      "map_pool": {
+        "best": ["Ascent", "Bind", "Haven"],
+        "avoid": ["Pearl", "Breeze"]
+      },
+      "agent_comps": {
+        "default": "Jett or Raze (demons1), Omen (Boostio), Killjoy, Fade or Skye, Gekko"
+      },
+      "strengths": [
+        "demons1 is one of the highest mechanical ceilings in Americas — explosive entry",
+        "Young and hungry — underdog energy translates to fearless play",
+        "Boostio's controller play is creative and hard to predict",
+        "High individual peak performance from multiple players"
+      ],
+      "weaknesses": [
+        "Consistency is their achilles heel — can look world-class or shaky in the same series",
+        "IGL depth is a question mark after coaching changes",
+        "International experience is limited compared to LOUD or NRG"
+      ],
+      "notable_achievements": [
+        "Champions 2023 — reached the grand finals, runners-up to LOUD",
+        "Proved that young aggressive teams can compete at the highest level"
+      ]
+    },
+
+    "gen_g": {
+      "region": "Pacific",
+      "full_name": "Gen.G",
+      "roster": ["Meteor", "Karon", "exy", "k1Ng", "TS"],
+      "coach": "Dubby",
+      "playstyle": "Gen.G plays a methodical, information-first Korean style. Meteor is their mechanical backbone — one of the most reliable duelists in the Pacific. The team is known for careful default play, strong site setups, and disciplined rotations. Less flashy than Paper Rex but extremely consistent.",
+      "map_pool": {
+        "best": ["Ascent", "Haven", "Lotus"],
+        "avoid": ["Bind", "Breeze"]
+      },
+      "agent_comps": {
+        "default": "Jett (Meteor), Astra or Omen, Killjoy, Fade or Skye, Breach"
+      },
+      "strengths": [
+        "Meteor is one of the most reliable duelists in Pacific — consistently high ACS",
+        "Strong fundamentals — rarely make unforced errors",
+        "Good map pool breadth — comfortable on most maps"
+      ],
+      "weaknesses": [
+        "Can be passive — struggle to match the aggression of teams like Paper Rex",
+        "Less explosive individual performances than top international teams"
+      ],
+      "notable_achievements": [
+        "Consistent Pacific League playoff finisher",
+        "Multiple VCT international appearances"
+      ]
+    },
+
+    "navi": {
+      "region": "EMEA",
+      "full_name": "Natus Vincere (NAVI)",
+      "roster": ["cNed", "ANGE1", "Shao", "ardiis", "SUYGETSU"],
+      "coach": "Ange1 (player-coach)",
+      "playstyle": "NAVI is built around cNed — one of the most mechanically gifted players in Valorant history. ANGE1's player-coach role gives them dual-purpose leadership: strategic preparation and in-game IGL. The team plays a star-player-centric style similar to Sentinels, trusting cNed to win duels in critical moments. SUYGETSU provides elite initiator support.",
+      "map_pool": {
+        "best": ["Haven", "Ascent", "Bind"],
+        "avoid": ["Lotus", "Pearl"]
+      },
+      "agent_comps": {
+        "default": "Jett or Neon (cNed), Omen, Killjoy or Cypher, Fade or Skye (SUYGETSU), Breach"
+      },
+      "strengths": [
+        "cNed's mechanical ability is among the top 5 in the world — an absolute duel monster",
+        "ANGE1 is an experienced leader who keeps the team composed",
+        "SUYGETSU is a world-class initiator — one of the best Fade players globally",
+        "Strong individual skill depth across the roster"
+      ],
+      "weaknesses": [
+        "cNed-centric play can be exploited when cNed is having an off day",
+        "Team dynamics have shifted through roster changes — consistency varies",
+        "Map pool is narrower than Fnatic"
+      ],
+      "notable_achievements": [
+        "EMEA powerhouse since Valorant esports inception",
+        "Multiple international deep runs",
+        "cNed considered one of EMEA's greatest ever duelists"
+      ]
+    },
+
+    "t1": {
+      "region": "Pacific",
+      "full_name": "T1",
+      "roster": ["ban", "Xeta", "carpe", "Destiny", "Munchkin"],
+      "coach": "Halo",
+      "playstyle": "T1 Korea plays a fast-paced, aggressive style relative to other Korean teams. carpe — the legendary CS/Overwatch veteran — brings a unique mechanical profile and game-reading ability that comes from years at the top of multiple FPS games. The team blends Korean tactical discipline with an aggressive attacking tempo.",
+      "map_pool": {
+        "best": ["Ascent", "Bind", "Haven"],
+        "avoid": ["Pearl", "Breeze"]
+      },
+      "agent_comps": {
+        "default": "Jett or Raze (carpe), Omen, Killjoy, Skye or Fade, Gekko"
+      },
+      "strengths": [
+        "carpe's FPS veteran game sense is unmatched — reads situations instantly",
+        "Korean discipline provides structural backbone",
+        "High individual talent across all five players"
+      ],
+      "weaknesses": [
+        "International results have been inconsistent",
+        "Roster changes have disrupted team chemistry at times"
+      ],
+      "notable_achievements": [
+        "Pacific League playoff appearances",
+        "carpe is a legendary esports figure across multiple titles"
+      ]
+    }
+  },
+
+  "players": {
+    "TenZ": {
+      "team": "Sentinels",
+      "role": "Duelist",
+      "signature_agents": ["Jett", "Reyna", "Neon", "Raze"],
+      "playstyle": "Hyper-aggressive entry fragger with mechanical skills widely considered the highest in North America. Known for insane flick shots, audacious angles, and the ability to single-handedly flip rounds. Can be passive when struggling with rhythm — needs space to be created for him.",
+      "notable_achievements": ["VCT Stage 1 Masters 2021 — helped Sentinels dominate", "Considered NA's most mechanically gifted player ever"]
+    },
+    "Aspas": {
+      "team": "LOUD",
+      "role": "Duelist",
+      "signature_agents": ["Jett", "Raze", "Neon"],
+      "playstyle": "The greatest all-around Valorant player of all time by many metrics. Elite mechanical skill combined with elite game sense. Aspas is not just a duel-winner — he makes his whole team better by creating space, winning clutches, and always performing when it matters most. His consistency at international events is unmatched.",
+      "notable_achievements": ["Champions 2022 winner", "Masters Tokyo 2023 winner", "Multiple tournament MVPs", "Highest rated player in VCT history by many statistics"]
+    },
+    "Boaster": {
+      "team": "Fnatic",
+      "role": "IGL / Controller",
+      "signature_agents": ["Gekko", "Breach", "Omen"],
+      "playstyle": "The most creative and beloved IGL in Valorant. Boaster's mid-round calls are legendary — he makes gutsy reads that look insane until they work perfectly. His personality keeps Fnatic's team environment positive through adversity. Mechanically average but game-sense is elite. Best known for iconic celebration dances and strategic masterclasses.",
+      "notable_achievements": ["Champions 2023 runners-up", "One of VCT's most recognizable personalities", "EMEA's most consistent IGL"]
+    },
+    "nAts": {
+      "team": "Team Liquid",
+      "role": "Sentinel",
+      "signature_agents": ["Cypher", "Killjoy", "Chamber"],
+      "playstyle": "The greatest sentinel player in Valorant history. nAts's setups are studied by coaches worldwide — his Cypher plays are innovative, punishing, and creative. He almost never gives away information for free. Mechanically solid but his value is entirely in information control, site holds, and reading opponents.",
+      "notable_achievements": ["Masters Reykjavik 2022 winner with Gambit", "Universally considered the best sentinel player ever", "His setups are literally taught in VOD review sessions globally"]
+    },
+    "Derke": {
+      "team": "Fnatic",
+      "role": "Duelist",
+      "signature_agents": ["Jett", "Neon", "Raze"],
+      "playstyle": "Finnish duelist with insane mechanical ability. Known for wide angle peeks, aggressive movement, and raw gunfight winning. Derke is a pure mechanical player — his game plan is simple: win the duel, make space for the team. Works because Boaster's IGL puts him in the right spots.",
+      "notable_achievements": ["Champions 2023 runners-up with Fnatic", "Consistently top ACS in EMEA"]
+    },
+    "cNed": {
+      "team": "NAVI",
+      "role": "Duelist",
+      "signature_agents": ["Jett", "Neon", "Chamber"],
+      "playstyle": "One of the most mechanically gifted players in Valorant history. cNed's knife play (Jett) is legendary — his ability to win duels with Jett's dash is almost unreal. Aggressive, fearless, and extremely consistent at the top level.",
+      "notable_achievements": ["Champions 2021 runner-up with Acend", "Named one of VCT's greatest ever duelists"]
+    },
+    "mindfreak": {
+      "team": "Paper Rex",
+      "role": "Duelist / Flex",
+      "signature_agents": ["Jett", "Raze", "Neon", "Reyna"],
+      "playstyle": "Paper Rex's chaos engine. mindfreak is the aggressive tip of the spear in PRX's system — he entries at full speed with no hesitation. His raw mechanical output under pressure is elite and his ability to win duels in the most chaotic scenarios is what makes PRX's style work.",
+      "notable_achievements": ["Champions 2022 runners-up with PRX", "Known for explosive entry performances"]
+    },
+    "FNS": {
+      "team": "NRG",
+      "role": "IGL / Controller",
+      "signature_agents": ["Omen", "Astra", "Viper"],
+      "playstyle": "The most cerebral IGL in Americas. FNS is famous for reading opponents in real time and making calls that seem impossible — 'calling the opponent' is his signature. His game-prep is obsessive and thorough. Mechanically he doesn't need to win duels; he wins maps through intelligence.",
+      "notable_achievements": ["Considered one of the greatest tactical minds in North American FPS history", "Led multiple teams to top international placements"]
+    },
+    "stax": {
+      "team": "DRX",
+      "role": "IGL / Flex",
+      "signature_agents": ["Fade", "Breach", "Sova"],
+      "playstyle": "Korea's most methodical IGL. stax's game-plans are meticulous — DRX is always prepared with counter-strategies for specific opponents. His in-game reads are based on information gathering rather than gut calls. One of the most disciplined leaders in all of Valorant.",
+      "notable_achievements": ["Champions 2022 winner", "Korean esports icon"]
+    },
+    "BuZz": {
+      "team": "DRX",
+      "role": "Flex",
+      "signature_agents": ["Jett", "Fade", "Skye", "KAY/O"],
+      "playstyle": "The most versatile player in the Pacific. BuZz can play duelist, initiator, or flex at an elite level — something almost no other player can do. This gives DRX incredible draft flexibility. He's mechanically strong in every role he plays.",
+      "notable_achievements": ["Champions 2022 winner", "Widely regarded as Pacific's most complete player"]
+    },
+    "Meteor": {
+      "team": "Gen.G",
+      "role": "Duelist",
+      "signature_agents": ["Jett", "Raze", "Neon"],
+      "playstyle": "Gen.G's primary duel-winner. Meteor is extremely consistent — rarely has bad games, always delivers baseline mechanical output. Not the flashiest player but endlessly reliable. His Jett is clean and technical.",
+      "notable_achievements": ["Pacific League regular playoff finisher", "One of Korea's most consistent duelists"]
+    },
+    "sacy": {
+      "team": "Sentinels",
+      "role": "Initiator / Flex",
+      "signature_agents": ["Fade", "Skye", "Sova"],
+      "playstyle": "World-class initiator play with elite game sense. sacy's utility usage creates windows for TenZ that few other initiators could generate. His Fade is technically excellent — never wastes a reveal or trail.",
+      "notable_achievements": ["Champions 2022 winner with LOUD", "Considered one of the best initiators in the world"]
+    },
+    "Less": {
+      "team": "LOUD",
+      "role": "Initiator",
+      "signature_agents": ["Skye", "Fade", "KAY/O", "Gekko"],
+      "playstyle": "LOUD's IGL and primary initiator. Less structures LOUD's aggression — while Aspas finds the duels, Less finds the information and creates the setup. Calm under pressure, excellent game-management.",
+      "notable_achievements": ["Champions 2022 winner", "Masters Tokyo 2023 winner", "Underrated IGL who deserves more recognition"]
+    },
+    "carpe": {
+      "team": "T1",
+      "role": "Duelist / Flex",
+      "signature_agents": ["Jett", "Sova", "Raze"],
+      "playstyle": "A veteran of multiple top-tier FPS games (Overwatch, CS, Valorant). carpe's game-sense is far beyond most Valorant-native players — he reads angles, predicts rotations, and makes mechanical plays that seem effortless. His FPS fundamentals are elite.",
+      "notable_achievements": ["Overwatch League MVP", "One of the greatest multi-game FPS talents ever", "T1 Pacific League appearances"]
+    }
+  },
+
+  "meta": {
+    "current_patch": "9.x (verify with web search for exact current patch)",
+    "top_agents_by_role": {
+      "duelist": ["Jett", "Neon", "Raze", "Reyna"],
+      "controller": ["Omen", "Viper", "Astra"],
+      "initiator": ["Skye", "Fade", "Gekko", "KAY/O", "Breach"],
+      "sentinel": ["Killjoy", "Cypher", "Deadlock"]
+    },
+    "current_map_pool": ["Ascent", "Bind", "Haven", "Lotus", "Sunset", "Abyss", "Pearl"],
+    "meta_notes": "Jett and Neon dominate the duelist slot. Omen is the most versatile controller. Double initiator compositions (Skye + Fade / Skye + Gekko) are very common. Killjoy remains the king of sentinel play. Astra has made a comeback in structured EMEA and Korean compositions. Note: patch meta changes frequently — always verify with web search for the most current state."
+  },
+
+  "vct_structure": {
+    "leagues": {
+      "americas": "VCT Americas — teams from NA, Brazil, LATAM. 10 partner teams.",
+      "emea": "VCT EMEA — teams from Europe, Turkey, Middle East. 10 partner teams.",
+      "pacific": "VCT Pacific — teams from Korea, Japan, SEA, South Asia. 10 partner teams.",
+      "china": "VCT China — 10 partner teams in a separate league."
+    },
+    "international_events": [
+      "Masters Bangkok (early season international LAN)",
+      "Masters Shanghai (mid-season international LAN)",
+      "Champions (end-of-year world championship)"
+    ],
+    "format_notes": "Each league plays a full split with playoff bracket. Top teams from each region qualify to international Masters events. All four regions send teams to Champions. Use web search to verify current standings and qualification status."
+  }
+}

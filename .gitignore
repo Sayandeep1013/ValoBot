@@ -1,0 +1,29 @@
+# Claude Code internals
+.claude/
+
+# Stray folders
+/publicimages
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+.yarn/install-state.gz
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# env files
+.env*.local
+.env
+
+# debug
+npm-debug.log*
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
