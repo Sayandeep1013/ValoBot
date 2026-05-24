@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { streamChatResponse, ChatMessage } from "@/lib/gemini";
 
 export const runtime = "nodejs";
+export const maxDuration = 60;
 
 export async function POST(req: NextRequest) {
   try {
@@ -29,7 +30,7 @@ export async function POST(req: NextRequest) {
     console.error("[/api/chat]", err);
     if (errObj?.status === 429) {
       return NextResponse.json(
-        { error: "API quota exceeded. Check your Gemini API key quota at aistudio.google.com." },
+        { error: "AI provider quota exceeded. Check your Groq API key quota." },
         { status: 429 }
       );
     }

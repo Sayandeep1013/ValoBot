@@ -1,124 +1,412 @@
 import Groq from "groq-sdk";
 import { getKnowledgeBaseContext } from "./knowledge-base";
 
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY! });
 const MODEL = "llama-3.3-70b-versatile";
+const FALLBACK_MODEL = "llama-3.1-8b-instant";
+const FETCH_TIMEOUT = 9000;
+const MAX_LIVE_SECTION_CHARS = 12000;
 
-// ─── System Prompt ────────────────────────────────────────────────────────────
-
-const SYSTEM_PROMPT = `You are CYPHER, the ultimate Valorant esports AI analyst. Named after the game's information broker — the one who knows everything — you are the definitive source of intel on VCT (Valorant Champions Tour) and all Valorant esports worldwide.
-
-YOUR PERSONALITY:
-- Passionate and enthusiastic — you live and breathe Valorant esports
-- Analytical and detailed — never give surface-level answers
-- Talk like the best Valorant content creators: knowledgeable, hype when needed, cold and clinical when breaking down strategy
-
-YOUR CAPABILITIES:
-- Curated knowledge base covers team playstyles, strategies, and player tendencies in depth
-- [LIVE DATA] blocks contain fresh web-searched information — always prioritise this over training knowledge
-- Combine curated knowledge + live search data for the richest possible answers
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-CRITICAL RULE — NEVER FABRICATE STATISTICS
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-• NEVER invent pick rates, win rates, match scores, tournament results, or any specific percentages
-• NEVER present a made-up table of numbers as facts, even qualified with "approximately" or "roughly"
-• If the [LIVE DATA] block contains the specific numbers → use them and cite the source
-• If [LIVE DATA] does NOT contain the specific numbers → say exactly this pattern:
-  "I searched live sources but couldn't pull verified pick-rate data for this.
-   From the meta I know: [describe the meta qualitatively — which agents are dominant and why,
-   without made-up percentages]. For exact current numbers check tracker.gg/valorant
-   or thespike.gg."
-• This rule is non-negotiable. One fabricated stat destroys user trust permanently.
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-BEHAVIOR RULES:
-- Always give detailed, thorough answers — the user wants depth
-- When covering a team: playstyle identity, key players, map preferences, recent form
-- When covering a player: role, signature agents, mechanical style, current team context
-- Build on conversation context — remember everything discussed
-- If search results are available, synthesise them — don't just paste raw data
-- If asked for a "chart" or "table" and you have live data numbers, format them in a clean markdown table
-
-CURATED KNOWLEDGE BASE (team strategies, playstyles, player profiles):
----
-{KB_CONTEXT}
----`;
-
-// ─── Smart search query builder ───────────────────────────────────────────────
-
-// Detects what kind of query this is and builds a precise Tavily search string
-function buildSearchQuery(userMessage: string): string {
-  const q = userMessage.toLowerCase();
-
-  // Agent statistics: pick rate, win rate, tier lists, most played
-  if (/agent|pick.?rate|most.?play|most.?pick|win.?rate|tier.?list|meta.?agent|agent.?meta/i.test(q)) {
-    return `Valorant VCT 2025 agent pick rate statistics ${userMessage}`;
-  }
-
-  // Match results / scores
-  if (/result|score|won|lost|beat|defeated|match|game \d/i.test(q)) {
-    return `Valorant VCT 2025 match result ${userMessage}`;
-  }
-
-  // Standings / rankings
-  if (/standing|rank|table|leaderboard|points/i.test(q)) {
-    return `Valorant VCT 2025 standings rankings ${userMessage}`;
-  }
-
-  // Player stats
-  if (/acs|kast|rating|kd|adr|player stat|performance|rating/i.test(q)) {
-    return `Valorant VCT 2025 player statistics ${userMessage}`;
-  }
-
-  // Roster / transfer news
-  if (/roster|transfer|sign|release|trade|benched|join|leave/i.test(q)) {
-    return `Valorant VCT 2025 roster transfer news ${userMessage}`;
-  }
-
-  // Upcoming events / schedule
-  if (/upcoming|schedule|next|when|date|time/i.test(q)) {
-    return `Valorant VCT 2025 schedule upcoming matches ${userMessage}`;
-  }
-
-  return `Valorant esports VCT 2025 ${userMessage}`;
+export interface ChatMessage {
+  role: "user" | "assistant";
+  content: string;
 }
 
-// Tavily domains split by query type so the right source is hit first
+type TavilyResult = {
+  title?: string;
+  url?: string;
+  content?: string;
+  score?: number;
+  published_date?: string;
+};
+
+type VLRResultMatch = {
+  team1?: string;
+  team2?: string;
+  score1?: string;
+  score2?: string;
+  time_completed?: string;
+  round_info?: string;
+  tournament_name?: string;
+};
+
+type VLRUpcomingMatch = {
+  team1?: string;
+  team2?: string;
+  time_until_match?: string;
+  match_series?: string;
+  match_event?: string;
+};
+
+type VLRRanking = {
+  rank?: string;
+  team?: string;
+  record?: string;
+  last_played?: string;
+  last_played_team?: string;
+};
+
+type Source = {
+  title: string;
+  url: string;
+  snippet: string;
+  publishedDate?: string;
+};
+
+type QualifiedTeam = {
+  name: string;
+  note: string;
+};
+
+type QualifierResult = {
+  region: string;
+  series: string;
+  team1: string;
+  team2: string;
+  score1: string;
+  score2: string;
+  ageText: string;
+  ageMinutes: number;
+  url: string;
+  sourceIndex: number;
+};
+
+const VLR_BASE = "https://vlrggapi.vercel.app";
+const VLR_EWC_2026_URL = "https://www.vlr.gg/event/2952/esports-world-cup-2026";
+const EWC_QUALIFIER_EVENTS = [
+  { region: "Americas", url: "https://www.vlr.gg/event/2953/esports-world-cup-2026-americas-qualifier" },
+  { region: "EMEA", url: "https://www.vlr.gg/event/2954/esports-world-cup-2026-emea-qualifier" },
+  { region: "Pacific", url: "https://www.vlr.gg/event/2955/esports-world-cup-2026-pacific-qualifier" },
+  { region: "China", url: "https://www.vlr.gg/event/2956/esports-world-cup-2026-china-qualifier" },
+];
+
 const STATS_DOMAINS = [
-  "tracker.gg",
-  "blitz.gg",
-  "thespike.gg",
   "vlr.gg",
-  "liquipedia.net",
+  "thespike.gg",
+  "rib.gg",
+  "tracker.gg",
   "valorantesports.com",
+  "liquipedia.net",
 ];
 
 const GENERAL_DOMAINS = [
   "vlr.gg",
   "thespike.gg",
-  "liquipedia.net",
   "valorantesports.com",
+  "liquipedia.net",
+  "rib.gg",
   "tracker.gg",
-  "twitter.com",
 ];
 
+function todayStamp() {
+  return new Intl.DateTimeFormat("en-US", {
+    dateStyle: "full",
+    timeStyle: "short",
+    timeZone: "Asia/Kolkata",
+  }).format(new Date());
+}
+
+function buildSearchQuery(userMessage: string): string {
+  const q = userMessage.toLowerCase();
+
+  if (/(\bewc\b|esports world cup)/i.test(q)) {
+    if (/match|matches|score|scores|result|results|latest|won|lost|beat|defeated|qualifier/i.test(q)) {
+      return `site:vlr.gg/event Esports World Cup 2026 Valorant qualifier latest results scores ${userMessage}`;
+    }
+    return `site:vlr.gg/event/2952 Esports World Cup 2026 Valorant participating qualified teams ${userMessage}`;
+  }
+
+  if (/agent|pick.?rate|most.?play|most.?pick|win.?rate|tier.?list|meta|composition|comp/i.test(q)) {
+    return `latest Valorant esports VCT agent meta pick rates ${userMessage}`;
+  }
+
+  if (/result|score|won|lost|beat|defeated|match|today|yesterday|schedule|upcoming|when/i.test(q)) {
+    return `latest Valorant esports VCT matches results schedule ${userMessage}`;
+  }
+
+  if (/standing|rank|ranking|leaderboard|points|best teams|top teams/i.test(q)) {
+    return `latest Valorant esports VCT team rankings standings ${userMessage}`;
+  }
+
+  if (/acs|kast|rating|kd|adr|player stat|performance|duelist|igl/i.test(q)) {
+    return `latest Valorant esports VCT player statistics ${userMessage}`;
+  }
+
+  if (/roster|transfer|signed|released|benched|joined|left/i.test(q)) {
+    return `latest Valorant esports roster transfer news ${userMessage}`;
+  }
+
+  return `latest Valorant esports VCT ${userMessage}`;
+}
+
 function chooseDomains(userMessage: string): string[] {
-  return /agent|pick.?rate|win.?rate|tier|stat|meta.?agent|most.?play/i.test(userMessage)
+  return /agent|pick.?rate|win.?rate|tier|stat|meta|acs|kast|rating|kd|adr/i.test(userMessage)
     ? STATS_DOMAINS
     : GENERAL_DOMAINS;
 }
 
-// ─── Tavily search ────────────────────────────────────────────────────────────
+function truncate(text: string | undefined, max = 700) {
+  const cleaned = (text ?? "").replace(/\s+/g, " ").trim();
+  return cleaned.length > max ? `${cleaned.slice(0, max - 1)}...` : cleaned;
+}
 
-const FETCH_TIMEOUT = 7000;
+async function safeJsonFetch(url: string): Promise<unknown | null> {
+  try {
+    const res = await fetch(url, {
+      signal: AbortSignal.timeout(FETCH_TIMEOUT),
+      headers: { "User-Agent": "ValoBot/1.0" },
+      cache: "no-store",
+    });
+    if (!res.ok) return null;
+    return await res.json();
+  } catch {
+    return null;
+  }
+}
 
-async function tavilySearch(userMessage: string): Promise<string> {
+async function safeTextFetch(url: string): Promise<string> {
+  try {
+    const res = await fetch(url, {
+      signal: AbortSignal.timeout(FETCH_TIMEOUT),
+      headers: { "User-Agent": "ValoBot/1.0" },
+      cache: "no-store",
+    });
+    return res.ok ? await res.text() : "";
+  } catch {
+    return "";
+  }
+}
+
+function decodeHtml(text: string) {
+  return text
+    .replace(/&amp;/g, "&")
+    .replace(/&quot;/g, "\"")
+    .replace(/&#039;/g, "'")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&ndash;/g, "-")
+    .replace(/&mdash;/g, "-")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function stripTags(text: string) {
+  return decodeHtml(text.replace(/<[^>]*>/g, " "));
+}
+
+function parseAgeMinutes(ageText: string) {
+  const text = ageText.toLowerCase();
+  const days = Number(text.match(/(\d+)\s*d/)?.[1] ?? 0);
+  const hours = Number(text.match(/(\d+)\s*h/)?.[1] ?? 0);
+  const minutes = Number(text.match(/(\d+)\s*m/)?.[1] ?? 0);
+  const total = days * 1440 + hours * 60 + minutes;
+  return total > 0 ? total : Number.MAX_SAFE_INTEGER;
+}
+
+function parseEwcQualifierResults(html: string, region: string, sourceIndex: number): QualifierResult[] {
+  const latestIndex = html.indexOf("Latest Results");
+  if (latestIndex === -1) return [];
+
+  const section = html.slice(latestIndex, html.indexOf("Contact", latestIndex) === -1 ? undefined : html.indexOf("Contact", latestIndex));
+  const anchors = [...section.matchAll(/<a class="wf-module-item[^"]*" href="([^"]+)">([\s\S]*?)<\/a>/g)];
+
+  return anchors
+    .map((match) => {
+      const href = match[1];
+      const block = match[2];
+      const series = stripTags(block.match(/event-sidebar-matches-series[^>]*>([\s\S]*?)<\/div>/)?.[1] ?? "");
+      const names = [...block.matchAll(/<span style="margin-left: 3px;">\s*([^<\r\n]+)/g)].map((m) => decodeHtml(m[1]));
+      const scores = [...block.matchAll(/<div class="score[^"]*">\s*([^<\r\n]+)/g)].map((m) => decodeHtml(m[1]));
+      const ageText = stripTags(block.match(/<div class="eta[^"]*"[^>]*>\s*([^<\r\n]+)/)?.[1] ?? "");
+
+      if (names.length < 2 || scores.length < 2 || scores[0] === "-" || scores[1] === "-") return null;
+
+      return {
+        region,
+        series,
+        team1: names[0],
+        team2: names[1],
+        score1: scores[0],
+        score2: scores[1],
+        ageText,
+        ageMinutes: parseAgeMinutes(ageText),
+        url: `https://www.vlr.gg${href}`,
+        sourceIndex,
+      } satisfies QualifierResult;
+    })
+    .filter((result): result is QualifierResult => Boolean(result));
+}
+
+async function fetchEwcQualifierResults() {
+  const pages = await Promise.all(
+    EWC_QUALIFIER_EVENTS.map(async (event, index) => ({
+      ...event,
+      html: await safeTextFetch(event.url),
+      sourceIndex: index + 1,
+    }))
+  );
+
+  const results = pages
+    .flatMap((page) => parseEwcQualifierResults(page.html, page.region, page.sourceIndex))
+    .sort((a, b) => a.ageMinutes - b.ageMinutes)
+    .slice(0, 12);
+
+  const lines = results.map((match, i) =>
+    `${i + 1}. [${match.region}] ${match.series}: ${match.team1} ${match.score1}-${match.score2} ${match.team2}${match.ageText ? ` (${match.ageText} ago)` : ""} [${match.sourceIndex}]`
+  );
+
+  return {
+    results,
+    text: results.length
+      ? `Latest VALORANT Esports World Cup 2026 qualifier results from VLR event pages:\n${lines.join("\n")}`
+      : "",
+    sources: EWC_QUALIFIER_EVENTS.map((event) => ({
+      title: `VLR EWC 2026 ${event.region} Qualifier`,
+      url: event.url,
+      snippet: `Qualifier page used to extract latest ${event.region} match results and scores.`,
+    } satisfies Source)),
+  };
+}
+
+async function fetchEwcQualifiedTeams() {
+  const html = await safeTextFetch(VLR_EWC_2026_URL);
+  const teams: QualifiedTeam[] = [];
+
+  if (html) {
+    const cards = html.split('<div class="wf-card event-team">').slice(1);
+    for (const raw of cards) {
+      const name = raw.match(/event-team-name"[^>]*>\s*(?:<i[^>]*>)?\s*([^<\r\n]+)/)?.[1]?.trim();
+      const noteHtml = raw.match(/event-team-note[\s\S]*?<a[^>]*>\s*([^<]+)/)?.[1];
+      const note = stripTags(noteHtml ?? "");
+      if (name && name !== "TBD") {
+        teams.push({ name: decodeHtml(name), note });
+      }
+    }
+  }
+
+  const lines = teams.map((team, i) => `${i + 1}. ${team.name} - ${team.note}`);
+  return {
+    teams,
+    text: teams.length
+      ? `VALORANT at Esports World Cup 2026 qualified/named teams on VLR main-event page:\n${lines.join("\n")}\nNamed teams: ${teams.length}. Total event slots: 16. All unfilled slots are still listed as TBD on the VLR main-event page.`
+      : "",
+    sources: teams.length
+      ? [{
+          title: "VLR Esports World Cup 2026 main event",
+          url: VLR_EWC_2026_URL,
+          snippet: `${teams.length} named teams: ${teams.map((team) => team.name).join(", ")}`,
+        } satisfies Source]
+      : [],
+  };
+}
+
+function isEwcQualificationQuestion(userMessage: string, messages: ChatMessage[]) {
+  const current = userMessage.toLowerCase();
+  const previousUserContext = messages
+    .slice(-4)
+    .filter((m) => m.role === "user")
+    .map((m) => m.content.toLowerCase())
+    .join(" ");
+  const hasDirectEwcContext = /\bewc\b|esports world cup/.test(current);
+  const hasFollowUpEwcContext =
+    /\bewc\b|esports world cup/.test(previousUserContext) &&
+    /^(list|name|names|which|who|how many|what teams|team names)\b/.test(current.trim());
+  const hasEwcContext = hasDirectEwcContext || hasFollowUpEwcContext;
+  const asksMatchScores = /match|matches|score|scores|result|results|latest|won|lost|beat|defeated/.test(current);
+  const asksQualifiedTeams =
+    /(qualified|qualification|confirmed|made it|participating)/.test(current) ||
+    /team names|list.*teams|how many.*teams|teams.*so far/.test(current);
+  return hasEwcContext && asksQualifiedTeams && !asksMatchScores;
+}
+
+function ewcQualifiedTeamsAnswer(teams: QualifiedTeam[]) {
+  if (!teams.length) {
+    return "I tried to fetch the VLR Esports World Cup 2026 main-event page, but could not extract the qualified team list right now. I will not guess the field.";
+  }
+
+  const lines = teams.map((team, i) => `${i + 1}. ${team.name} - ${team.note}`);
+  return `As of ${todayStamp()}, VLR's VALORANT Esports World Cup 2026 main-event page has ${teams.length} named qualified teams out of 16 total slots. The remaining slots are still listed as TBD.\n\n${lines.join("\n")}\n\nSources:\n[1] VLR Esports World Cup 2026 main event - ${VLR_EWC_2026_URL}`;
+}
+
+function ewcQualifierResultsAnswer(results: QualifierResult[]) {
+  if (!results.length) {
+    return "I fetched the EWC qualifier event pages, but could not extract completed qualifier results right now. I will not guess scores.";
+  }
+
+  const lines = results.slice(0, 6).map((match) =>
+    `- ${match.team1} ${match.score1}-${match.score2} ${match.team2} (${match.region}, ${match.series}) [${match.sourceIndex}]`
+  );
+
+  return `Latest EWC 2026 VALORANT qualifier results I could verify:\n${lines.join("\n")}\n\nSources:\n${EWC_QUALIFIER_EVENTS.map((event, i) => `[${i + 1}] VLR EWC 2026 ${event.region} Qualifier - ${event.url}`).join("\n")}`;
+}
+
+function formatVLRData(results: unknown, upcoming: unknown, rankings: unknown) {
+  const parts: string[] = [];
+  const sources: Source[] = [];
+
+  const resultSegments = (results as { data?: { segments?: VLRResultMatch[] } })?.data?.segments;
+  if (resultSegments?.length) {
+    const lines = resultSegments.slice(0, 8).map((m) => {
+      const score = m.score1 !== undefined ? ` ${m.score1}-${m.score2}` : "";
+      const when = m.time_completed ? ` (${m.time_completed})` : "";
+      const event = m.tournament_name ? ` - ${m.tournament_name}` : m.round_info ? ` - ${m.round_info}` : "";
+      return `- ${m.team1}${score} vs ${m.team2}${when}${event}`;
+    });
+    parts.push(`Recent VLR results:\n${lines.join("\n")}`);
+    sources.push({
+      title: "VLR recent results",
+      url: "https://www.vlr.gg/matches/results",
+      snippet: lines.join(" "),
+    });
+  }
+
+  const upcomingSegments = (upcoming as { data?: { segments?: VLRUpcomingMatch[] } })?.data?.segments;
+  if (upcomingSegments?.length) {
+    const lines = upcomingSegments.slice(0, 8).map((m) => {
+      const when = m.time_until_match ? ` in ${m.time_until_match}` : "";
+      const event = m.match_event ? ` - ${m.match_event}` : "";
+      const series = m.match_series ? ` (${m.match_series})` : "";
+      return `- ${m.team1} vs ${m.team2}${when}${series}${event}`;
+    });
+    parts.push(`Upcoming VLR matches:\n${lines.join("\n")}`);
+    sources.push({
+      title: "VLR upcoming matches",
+      url: "https://www.vlr.gg/matches",
+      snippet: lines.join(" "),
+    });
+  }
+
+  const rankData = (rankings as { data?: VLRRanking[] })?.data;
+  if (Array.isArray(rankData) && rankData.length) {
+    const lines = rankData.slice(0, 12).map((r) => {
+      const record = r.record ? ` (${r.record})` : "";
+      const last = r.last_played_team ? ` | last: ${r.last_played_team}` : "";
+      return `- #${r.rank} ${r.team}${record}${last}`;
+    });
+    parts.push(`VLR rankings snapshot:\n${lines.join("\n")}`);
+    sources.push({
+      title: "VLR rankings",
+      url: "https://www.vlr.gg/rankings",
+      snippet: lines.join(" "),
+    });
+  }
+
+  return { text: parts.join("\n\n"), sources };
+}
+
+async function fetchVLRData() {
+  const [results, upcoming, rankings] = await Promise.all([
+    safeJsonFetch(`${VLR_BASE}/match?q=results`),
+    safeJsonFetch(`${VLR_BASE}/match?q=upcoming`),
+    safeJsonFetch(`${VLR_BASE}/rankings?region=all`),
+  ]);
+
+  return formatVLRData(results, upcoming, rankings);
+}
+
+async function tavilySearch(userMessage: string) {
   const apiKey = process.env.TAVILY_API_KEY;
-  if (!apiKey) return "";
+  if (!apiKey) return { text: "", sources: [] as Source[] };
 
-  const query   = buildSearchQuery(userMessage);
-  const domains = chooseDomains(userMessage);
+  const query = buildSearchQuery(userMessage);
 
   try {
     const res = await fetch("https://api.tavily.com/search", {
@@ -130,158 +418,238 @@ async function tavilySearch(userMessage: string): Promise<string> {
       },
       body: JSON.stringify({
         query,
-        max_results: 6,
+        max_results: 5,
         include_answer: true,
-        search_depth: "basic",
-        include_domains: domains,
+        search_depth: "advanced",
+        include_domains: chooseDomains(userMessage),
       }),
+      cache: "no-store",
     });
 
-    if (!res.ok) return "";
+    if (!res.ok) return { text: "", sources: [] as Source[] };
     const data = await res.json();
+    const results = ((data.results ?? []) as TavilyResult[])
+      .filter((r) => r.title && r.url && r.content)
+      .slice(0, 7);
 
-    const parts: string[] = [];
-    if (data.answer) parts.push(`Summary: ${data.answer}`);
+    const sources = results.map((r) => ({
+      title: r.title!,
+      url: r.url!,
+      snippet: truncate(r.content, 750),
+      publishedDate: r.published_date,
+    }));
 
-    const snippets = (data.results as Array<{ title: string; url: string; content: string }>)
-      ?.slice(0, 5)
-      .map((r) => `[${r.title}](${r.url})\n${r.content.slice(0, 600)}`)
+    const sourceText = sources
+      .map((s, i) => {
+        const date = s.publishedDate ? ` | published: ${s.publishedDate}` : "";
+        return `[${i + 1}] ${s.title}${date}\nURL: ${s.url}\nSnippet: ${s.snippet}`;
+      })
       .join("\n\n");
-    if (snippets) parts.push(snippets);
 
-    return parts.length
-      ? `Search query used: "${query}"\n\n${parts.join("\n\n")}`
-      : "";
+    const answer = data.answer ? `Search summary: ${truncate(data.answer, 900)}\n\n` : "";
+    return {
+      text: `Search query used: "${query}"\n\n${answer}${sourceText}`,
+      sources,
+    };
   } catch {
-    return "";
+    return { text: "", sources: [] as Source[] };
   }
 }
 
-// ─── vlrggapi — live match + ranking data ─────────────────────────────────────
+async function jinaSearch(userMessage: string) {
+  const apiKey = process.env.JINA_API_KEY;
+  if (!apiKey) return { text: "", sources: [] as Source[] };
 
-interface VLRResultMatch {
-  team1: string; team2: string;
-  score1?: string; score2?: string;
-  time_completed?: string; round_info?: string; tournament_name?: string;
-}
-interface VLRUpcomingMatch {
-  team1: string; team2: string;
-  time_until_match?: string; match_series?: string; match_event?: string;
-}
-interface VLRRanking {
-  rank: string; team: string;
-  record?: string; last_played?: string; last_played_team?: string;
-}
+  const query = buildSearchQuery(userMessage);
 
-const VLR_BASE = "https://vlrggapi.vercel.app";
-
-async function safeFetch(url: string): Promise<unknown | null> {
   try {
-    const res = await fetch(url, {
-      signal: AbortSignal.timeout(FETCH_TIMEOUT),
-      headers: { "User-Agent": "ValoBot/1.0" },
+    const res = await fetch(`https://s.jina.ai/${encodeURIComponent(query)}`, {
+      signal: AbortSignal.timeout(25000),
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        Accept: "text/plain",
+      },
+      cache: "no-store",
     });
-    if (!res.ok) return null;
-    return await res.json();
+
+    if (!res.ok) return { text: "", sources: [] as Source[] };
+    const text = await res.text();
+    const entries = [...text.matchAll(/\[(\d+)\]\s+Title:\s*([^\n]+)\n\[\1\]\s+URL Source:\s*([^\n]+)\n(?:\[\1\]\s+Description:\s*([\s\S]*?)(?=\n\[\d+\]\s+Title:|$))?/g)];
+    const sources = entries.slice(0, 6).map((entry) => ({
+      title: decodeHtml(entry[2]),
+      url: entry[3].trim(),
+      snippet: truncate(entry[4] ?? "", 700),
+    }));
+
+    return {
+      text: `Jina search query used: "${query}"\n\n${truncate(text, 2500)}`,
+      sources,
+    };
   } catch {
-    return null;
+    return { text: "", sources: [] as Source[] };
   }
-}
-
-function formatVLRData(results: unknown, upcoming: unknown, rankings: unknown): string {
-  const parts: string[] = [];
-
-  const resultSegments = (results as { data?: { segments?: VLRResultMatch[] } })?.data?.segments;
-  if (resultSegments?.length) {
-    const lines = resultSegments.slice(0, 8).map((m) => {
-      const score = m.score1 !== undefined ? ` ${m.score1}-${m.score2}` : "";
-      const when  = m.time_completed ? ` (${m.time_completed})` : "";
-      const event = m.tournament_name ? ` — ${m.tournament_name}` : m.round_info ? ` — ${m.round_info}` : "";
-      return `• ${m.team1}${score} def. ${m.team2}${when}${event}`;
-    });
-    parts.push(`RECENT RESULTS (vlr.gg):\n${lines.join("\n")}`);
-  }
-
-  const upcomingSegments = (upcoming as { data?: { segments?: VLRUpcomingMatch[] } })?.data?.segments;
-  if (upcomingSegments?.length) {
-    const lines = upcomingSegments.slice(0, 6).map((m) => {
-      const when   = m.time_until_match ? ` in ${m.time_until_match}` : "";
-      const event  = m.match_event     ? ` — ${m.match_event}` : "";
-      const series = m.match_series    ? ` (${m.match_series})` : "";
-      return `• ${m.team1} vs ${m.team2}${when}${series}${event}`;
-    });
-    parts.push(`UPCOMING MATCHES (vlr.gg):\n${lines.join("\n")}`);
-  }
-
-  const rankData = (rankings as { data?: VLRRanking[] })?.data;
-  if (Array.isArray(rankData) && rankData.length) {
-    const lines = rankData.slice(0, 10).map((r) => {
-      const record = r.record ? ` (${r.record})` : "";
-      const last   = r.last_played_team ? ` | last: ${r.last_played_team}` : "";
-      return `#${r.rank} ${r.team}${record}${last}`;
-    });
-    parts.push(`VCT AMERICAS RANKINGS (vlr.gg):\n${lines.join("\n")}`);
-  }
-
-  return parts.join("\n\n");
-}
-
-async function fetchVLRData(): Promise<string> {
-  const [results, upcoming, rankings] = await Promise.all([
-    safeFetch(`${VLR_BASE}/match?q=results`),
-    safeFetch(`${VLR_BASE}/match?q=upcoming`),
-    safeFetch(`${VLR_BASE}/rankings?region=na`),
-  ]);
-  return formatVLRData(results, upcoming, rankings);
-}
-
-// ─── Main export ──────────────────────────────────────────────────────────────
-
-export interface ChatMessage {
-  role: "user" | "assistant";
-  content: string;
 }
 
 function toGroqMessages(messages: ChatMessage[]): Groq.Chat.ChatCompletionMessageParam[] {
-  return messages.map((m) => ({ role: m.role, content: m.content }));
+  return messages
+    .filter((m) => m.content.trim())
+    .slice(-8)
+    .map((m) => ({ role: m.role, content: m.content }));
+}
+
+function citationList(sources: Source[]) {
+  const seen = new Set<string>();
+  return sources
+    .filter((s) => {
+      if (seen.has(s.url)) return false;
+      seen.add(s.url);
+      return true;
+    })
+    .slice(0, 10)
+    .map((s, i) => `[${i + 1}] ${s.title} - ${s.url}`)
+    .join("\n");
+}
+
+function makeSystemPrompt(liveSources: Source[]) {
+  return `You are CYPHER, a Valorant esports intelligence analyst.
+
+Current timestamp: ${todayStamp()}.
+
+Core rules:
+- Always prioritize LIVE DATA over the curated knowledge base.
+- Every answer should assume the user wants current Valorant esports context unless they ask for history.
+- Use the live sources supplied in this request. Cite them inline as [1], [2], etc. when stating recent results, schedules, rankings, roster moves, patch/meta claims, or statistics.
+- If the VLR snapshot contains team names and a score, treat that score as verified by the VLR snapshot and cite it. Do not immediately say the same score could not be verified.
+- For VALORANT Esports World Cup 2026 qualification questions, the EWC 2026 main-event snapshot is the authority. Count only named teams in that snapshot as qualified; do not count TBD slots, qualifier participants, or generic match-list teams as qualified.
+- For VALORANT Esports World Cup 2026 qualifier match/result/score questions, use the EWC qualifier results snapshot. Do not answer with the qualified-team list unless the user specifically asks which teams have qualified. Cite the source number at the end of each result line, like [2].
+- Do not write "cited from the snapshot" as a citation. Use only numbered source markers from the citation map.
+- If the user only asks for matches, results, or scores, answer with the latest result lines and a Sources section. Do not add strategy/meta analysis unless they ask for analysis.
+- Never invent exact scores, dates, percentages, pick rates, ratings, rosters, or standings. If live sources do not verify a number, say that you could not verify the exact number and then give qualitative analysis.
+- Do not add player names, roster context, causes, or "why they won" explanations to a recent result unless that detail appears in the live data for this turn. If you use the curated knowledge base for background, label it as background, not a verified current fact.
+- If live sources conflict, name the conflict briefly and lean on official or specialist sources in this order: valorantesports.com, vlr.gg, thespike.gg, Liquipedia, tracker/rib/blitz-style stat sites.
+- Keep the tone sharp and analytical: explain what the fact means strategically, not just what happened.
+- Avoid filler. Start with the direct answer, then add evidence, implications, and caveats.
+- If the question is broad, structure the answer with short headings.
+- When live sources are used, end with a compact "Sources" section that lists the cited source numbers, titles, and URLs.
+
+Citation map for this turn:
+${citationList(liveSources) || "No live source URLs were retrieved. Be explicit about this limitation."}
+
+Curated knowledge base, for background only:
+${truncate(getKnowledgeBaseContext(), 3500)}`;
+}
+
+function makeCompactSystemPrompt(liveSources: Source[]) {
+  return `You are CYPHER, a Valorant esports analyst. Use live data first and cite source numbers from the citation map. Do not invent exact facts, scores, dates, stats, rosters, or standings. If data is missing, say so briefly.
+
+Citation map:
+${citationList(liveSources) || "No live source URLs were retrieved."}`;
+}
+
+function fallbackStream(message: string): ReadableStream<Uint8Array> {
+  return new ReadableStream<Uint8Array>({
+    start(controller) {
+      controller.enqueue(new TextEncoder().encode(message));
+      controller.close();
+    },
+  });
 }
 
 export async function streamChatResponse(
   messages: ChatMessage[],
   newMessage: string
 ): Promise<ReadableStream<Uint8Array>> {
+  const shouldAnswerEwcQualified = isEwcQualificationQuestion(newMessage, messages);
+  const isEwcQuestion = /(\bewc\b|esports world cup)/i.test(newMessage) || shouldAnswerEwcQualified;
+  const isEwcScoreQuestion = isEwcQuestion && /match|matches|score|scores|result|results|latest|won|lost|beat|defeated|qualifier/.test(newMessage.toLowerCase());
 
-  // Always fetch both sources in parallel
-  const [vlrData, tavilyData] = await Promise.all([
-    fetchVLRData(),
+  const [vlrData, tavilyData, jinaData, ewcData, ewcQualifierData] = await Promise.all([
+    isEwcQuestion
+      ? Promise.resolve({ text: "", sources: [] as Source[] })
+      : fetchVLRData(),
     tavilySearch(newMessage),
+    jinaSearch(newMessage),
+    isEwcQuestion
+      ? fetchEwcQualifiedTeams()
+      : Promise.resolve({ text: "", teams: [] as QualifiedTeam[], sources: [] as Source[] }),
+    isEwcScoreQuestion
+      ? fetchEwcQualifierResults()
+      : Promise.resolve({ text: "", results: [] as QualifierResult[], sources: [] as Source[] }),
   ]);
 
-  const liveBlocks: string[] = [];
-  if (vlrData)     liveBlocks.push(vlrData);
-  if (tavilyData)  liveBlocks.push(`WEB SEARCH RESULTS:\n${tavilyData}`);
+  const liveBlocks = [
+    ewcQualifierData.text ? `EWC 2026 QUALIFIER RESULTS SNAPSHOT\n${ewcQualifierData.text}` : "",
+    ewcData.text ? `EWC 2026 MAIN EVENT SNAPSHOT\n${ewcData.text}` : "",
+    vlrData.text ? `VLR SNAPSHOT\n${vlrData.text}` : "",
+    jinaData.text ? `JINA WEB SEARCH RESULTS\n${jinaData.text}` : "",
+    tavilyData.text ? `WEB SEARCH RESULTS\n${tavilyData.text}` : "",
+  ].filter(Boolean);
 
+  const liveSources = [
+    ...ewcQualifierData.sources,
+    ...ewcData.sources,
+    ...vlrData.sources,
+    ...jinaData.sources,
+    ...tavilyData.sources,
+  ];
   const liveSection = liveBlocks.length
-    ? `\n\n[LIVE DATA — fetched right now from real sources]\n${liveBlocks.join("\n\n")}\n[END LIVE DATA]`
-    : "\n\n[LIVE DATA: search returned no results for this query]";
-
-  const systemContent =
-    SYSTEM_PROMPT.replace("{KB_CONTEXT}", getKnowledgeBaseContext()) +
-    liveSection;
+    ? truncate(liveBlocks.join("\n\n---\n\n"), isEwcQuestion ? MAX_LIVE_SECTION_CHARS : 7000)
+    : "No live web/VLR data was retrieved for this request.";
 
   const groqMessages: Groq.Chat.ChatCompletionMessageParam[] = [
-    { role: "system", content: systemContent },
+    { role: "system", content: makeSystemPrompt(liveSources) },
     ...toGroqMessages(messages),
-    { role: "user", content: newMessage },
+    {
+      role: "user",
+      content: `User question: ${newMessage}\n\nLive data fetched for this exact question:\n${liveSection}\n\nAnswer using the live data first. Cite sources from the citation map when using live facts. If exact current data is missing, say so clearly and then give the best qualitative analysis from the verified context.`,
+    },
   ];
 
-  const stream = await groq.chat.completions.create({
-    model: MODEL,
-    messages: groqMessages,
-    temperature: 0.4,   // lower temp = less creative hallucination on factual queries
-    max_tokens: 2048,
-    stream: true,
-  });
+  const createStream = (messagesForModel: Groq.Chat.ChatCompletionMessageParam[], model = MODEL, maxTokens = 1000) =>
+    new Groq({ apiKey: process.env.GROQ_API_KEY }).chat.completions.create({
+      model,
+      messages: messagesForModel,
+      temperature: 0.25,
+      max_tokens: maxTokens,
+      stream: true,
+    });
+
+  let stream: Awaited<ReturnType<typeof createStream>>;
+  try {
+    stream = await createStream(groqMessages);
+  } catch (err) {
+    console.error("[chat/groq] primary request failed", err);
+    const compactMessages: Groq.Chat.ChatCompletionMessageParam[] = [
+      { role: "system", content: makeCompactSystemPrompt(liveSources) },
+      {
+        role: "user",
+        content: `User question: ${newMessage}\n\nCompact live data:\n${truncate(liveSection, 3500)}\n\nAnswer concisely with citations. Do not invent missing facts.`,
+      },
+    ];
+    try {
+      stream = await createStream(compactMessages, FALLBACK_MODEL, 700);
+    } catch (retryErr) {
+      console.error("[chat/groq] compact retry failed", retryErr);
+      if (shouldAnswerEwcQualified && ewcData.teams.length) {
+        return fallbackStream(ewcQualifiedTeamsAnswer(ewcData.teams));
+      }
+      if (isEwcScoreQuestion && ewcQualifierData.results.length) {
+        return fallbackStream(ewcQualifierResultsAnswer(ewcQualifierData.results));
+      }
+      return fallbackStream(
+        "I fetched live context, but the analysis engine did not respond. Try again in a moment. I will not fabricate an answer without the model pass."
+      );
+    }
+  }
+
+  if (!stream) {
+    if (shouldAnswerEwcQualified && ewcData.teams.length) {
+      return fallbackStream(ewcQualifiedTeamsAnswer(ewcData.teams));
+    }
+    if (isEwcScoreQuestion && ewcQualifierData.results.length) {
+      return fallbackStream(ewcQualifierResultsAnswer(ewcQualifierData.results));
+    }
+  }
 
   return new ReadableStream<Uint8Array>({
     async start(controller) {

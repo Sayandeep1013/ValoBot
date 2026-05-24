@@ -1,6 +1,8 @@
 import PageNav from "@/components/Layout/PageNav";
 import Link from "next/link";
 
+export const dynamic = "force-dynamic";
+
 interface VLRMatch {
   team1: string;
   team2: string;
@@ -17,8 +19,8 @@ interface VLRMatch {
 async function getMatches() {
   try {
     const [r, u] = await Promise.all([
-      fetch("https://vlrggapi.vercel.app/match?q=results",  { next: { revalidate: 300 } }),
-      fetch("https://vlrggapi.vercel.app/match?q=upcoming", { next: { revalidate: 300 } }),
+      fetch("https://vlrggapi.vercel.app/match?q=results",  { next: { revalidate: 300 }, signal: AbortSignal.timeout(8000) }),
+      fetch("https://vlrggapi.vercel.app/match?q=upcoming", { next: { revalidate: 300 }, signal: AbortSignal.timeout(8000) }),
     ]);
     const results  = r.ok  ? (await r.json())?.data?.segments  as VLRMatch[] ?? [] : [];
     const upcoming = u.ok  ? (await u.json())?.data?.segments  as VLRMatch[] ?? [] : [];

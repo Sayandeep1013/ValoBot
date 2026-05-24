@@ -60,8 +60,8 @@ export default function ChatInterface() {
       }
     } catch {
       const errMsg = responseStatus === 429
-        ? "API quota exceeded — try again in a moment."
-        : "Connection error. Check your network and API key.";
+        ? "AI provider quota exceeded. Try again in a moment."
+        : "I could not complete the live intel request. Check the server logs, network, or API keys.";
       setMessages((prev) => {
         const next = [...prev];
         next[next.length - 1] = { role: "assistant", content: errMsg };

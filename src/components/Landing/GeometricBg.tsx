@@ -2,7 +2,7 @@
 
 // Clean Valorant-style angular step lines.
 // Inspired by Riot's official art — horizontal → angled step → horizontal.
-// Minimal: 4 step lines, small square joints, a vertical accent, subtle dot grid.
+// Minimal: 4 step lines, small square joints, and a subtle dot grid.
 // No rotating rings, no orbiting dots, no reticles — just clean HUD geometry.
 
 export default function GeometricBg() {
@@ -85,15 +85,6 @@ export default function GeometricBg() {
           strokeWidth="1.1"
         />
         <rect x="1153" y="148" width="13" height="13" fill="rgba(255,255,255,0.38)" />
-
-        {/* ── Vertical accent — right side ─────────────────────────── */}
-        <line
-          x1="1295" y1="140" x2="1295" y2="520"
-          stroke="rgba(255,255,255,0.34)"
-          strokeWidth="1.1"
-        />
-        <line x1="1272" y1="140" x2="1318" y2="140" stroke="rgba(255,255,255,0.42)" strokeWidth="1.1" />
-        <line x1="1278" y1="520" x2="1312" y2="520" stroke="rgba(255,255,255,0.42)" strokeWidth="1.1" />
 
         {/* ── Left edge accent ─────────────────────────────────────── */}
         <polyline

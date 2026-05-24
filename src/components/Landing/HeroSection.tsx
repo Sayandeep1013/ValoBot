@@ -440,11 +440,11 @@ export default function HeroSection() {
         </nav>
 
         {/* MAIN — content starts right of where Omen rests */}
-        <main style={{ gridColumn:"1", gridRow:"3", display:"flex", flexDirection:"column", padding:"30px 32px 24px", paddingLeft:"clamp(260px,34vw,480px)", overflow:"hidden" }}>
-          <p style={{ fontFamily:mono, fontSize:12, letterSpacing:"0.22em", color:dim, marginBottom:14 }}>— DEPLOY CYPHER / AGENT READY</p>
+        <main style={{ gridColumn:"1", gridRow:"3", display:"flex", flexDirection:"column", justifyContent:"center", padding:"18px 32px 76px", paddingLeft:"clamp(260px,34vw,480px)", overflow:"hidden" }}>
+          <p style={{ fontFamily:mono, fontSize:12, letterSpacing:"0.22em", color:dim, marginBottom:10 }}>— DEPLOY CYPHER / AGENT READY</p>
 
           {/* Big headline: solid / outline / solid */}
-          <h2 style={{ fontFamily:headline, textTransform:"uppercase", lineHeight:0.9, letterSpacing:"0.04em", fontSize:"clamp(54px,7.8vw,112px)", marginBottom:24 }}>
+          <h2 style={{ fontFamily:headline, textTransform:"uppercase", lineHeight:0.9, letterSpacing:"0.04em", fontSize:"clamp(50px,7.2vw,102px)", marginBottom:18 }}>
             <span
               className={isGlitching ? "glitch-line glitch-active" : "glitch-line"}
               data-text="READY"
@@ -459,7 +459,7 @@ export default function HeroSection() {
           </h2>
 
           {/* Stat blocks */}
-          <div style={{ display:"flex", gap:1, marginBottom:20 }}>
+          <div style={{ display:"flex", gap:1, marginBottom:14 }}>
             {S2_STATS.map(({val,lbl,col})=>(
               <div key={lbl} style={{ padding:"12px 16px", border:bdr, background:"rgba(255,255,255,0.02)", minWidth:82 }}>
                 <p style={{ fontFamily:display, fontWeight:900, fontSize:26, color:col, lineHeight:1, letterSpacing:"0.04em", textShadow:`0 0 16px ${col}55` }}>{val}</p>
@@ -469,19 +469,19 @@ export default function HeroSection() {
           </div>
 
           {/* Neon capability tags */}
-          <div style={{ display:"flex", flexWrap:"wrap", gap:5, marginBottom:22 }}>
+          <div style={{ display:"flex", flexWrap:"wrap", gap:5, marginBottom:16 }}>
             {S2_NEON.map(({color,label})=>(
               <NeonTag key={label} color={color} label={label} />
             ))}
           </div>
 
-          <p style={{ fontFamily:mono, fontSize:13, color:"#999", letterSpacing:"0.05em", lineHeight:1.85, maxWidth:480, marginBottom:28 }}>
+          <p style={{ fontFamily:mono, fontSize:13, color:"#999", letterSpacing:"0.05em", lineHeight:1.75, maxWidth:480, marginBottom:18 }}>
             CYPHER has eyes on every team in every region. Ask about playstyle, strategy, roster changes, match results, agent meta — anything. Real intel, no filler.
           </p>
 
           <div style={{ display:"flex", alignItems:"center", gap:14 }}>
             <Link href="/chat" style={{ fontFamily:display, fontWeight:700, fontSize:15, letterSpacing:"0.2em", textDecoration:"none", color:"#080808", background:"#efefef", padding:"13px 32px", clipPath:"polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))", display:"inline-block" }}>
-              ENTER CYPHER
+              ASK CYPHER
             </Link>
             <Link href="/matches" style={{ fontFamily:display, fontWeight:700, fontSize:13, letterSpacing:"0.18em", textDecoration:"none", color:"#0a0a0a", WebkitTextStroke:"1px rgba(255,255,255,0.45)", border:"1px solid rgba(255,255,255,0.15)", padding:"12px 24px", display:"inline-block" }}>
               VIEW MATCHES

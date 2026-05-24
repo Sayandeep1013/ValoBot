@@ -1,6 +1,8 @@
 import PageNav from "@/components/Layout/PageNav";
 import Link from "next/link";
 
+export const dynamic = "force-dynamic";
+
 interface VLRRanking {
   rank: string;
   team: string;
@@ -14,6 +16,7 @@ async function getRankings(region: string): Promise<VLRRanking[]> {
   try {
     const res = await fetch(`https://vlrggapi.vercel.app/rankings?region=${region}`, {
       next: { revalidate: 600 },
+      signal: AbortSignal.timeout(8000),
     });
     if (!res.ok) return [];
     const data = await res.json();
